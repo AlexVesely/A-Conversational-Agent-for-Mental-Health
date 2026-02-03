@@ -43,7 +43,10 @@ class ChatController extends Controller
         
         // Formatting the Output into String (Temporary for debugging)
         $jsonString = json_encode($apiData);
-        $finalResponse = "Hello, I see you said: \"$userMessage\". Detected emotion(s) data: $jsonString";
+        $generatedPrompt = $this->buildLlmPrompt($userMessage,$apiData);
+        $finalResponse = "Hello, I see you said: \"$userMessage\". " . 
+                 "Detected emotion(s) data: $jsonString" . 
+                 "DECISION TREE OUTPUT: $generatedPrompt";
 
         return $this->redirectWithResponse($finalResponse);
     }
@@ -52,7 +55,7 @@ class ChatController extends Controller
     //?string in type signature indicates either string or null can be returned
     private function runSafetyFilter(string $text): ?string
     {
-        $blacklistedWords = ['kill myself', 'suicide', 'self harm', 'end it all'];
+        $blacklistedWords = ['kill myself', 'suicide', 'suicidal', 'self harm', 'end it all', 'no reason to live'];
 
         foreach ($blacklistedWords as $word) {
             if (Str::contains(strtolower($text), $word)) {
@@ -78,9 +81,64 @@ class ChatController extends Controller
             ]);
 
         return [ // return as an array
-            'you_sent' => $inputText, //debugging to see what was sent to the model
             'api_response' => $response->json() //format JSON data into a php array
         ];
+    }
+
+    //Follows a decision tree to generate a prompt for the llm
+    private function buildLlmPrompt(string $userMessage, array $apiData): string 
+    {
+        $scores = $apiData['api_response'][0];
+
+        $primaryEmotion = $scores[0]; // API returns emotion in order of highest confidence classification
+        $secondaryEmotion = $scores[1];
+
+        $primaryLabel = $primaryEmotion['label'];
+        $primaryScore = $primaryEmotion['score'];
+        $secondaryLabel = $secondaryEmotion['label'];
+        $secondaryScore = $secondaryEmotion['score'];
+
+        $specificInstruction = "";
+
+        // Check for High Intensity (80%+)
+        if ($primaryScore >= 0.80) {
+            $specificInstruction = "The user is feeling intense $primaryLabel. Prioritize immediate de-escalation and grounding.";
+        } 
+        // Check for Combos 
+        elseif ($primaryScore > 0.40 && $secondaryScore > 0.40) {
+            $specificInstruction = "The user is experiencing a mix of $primaryLabel and $secondaryLabel . Help them untangle these feelings.";
+        }
+        // Standard CBT Mapping
+        else {
+            $specificInstruction = match ($primaryLabel) {
+                'anger' => "The user feels angry.",
+                'disgust'   => "The user feels disgusted.",
+                'fear'    => "The user feels fear.",
+                'joy'   => "The user seems joyful." ,
+                'neutral'   => "The user seems neutral." ,
+                'sadness'   => "The user seems sad." ,
+                'surprise'   => "The user seems surprised."
+            };
+        }
+
+        return "SYSTEM INSTRUCTIONS:
+        You are a supportive CBT Chatbot. Follow these core principles:
+        - Help the user question unhelpful thoughts/beliefs.
+        - Encourage noticing emotions as temporary passing states.
+        - Focus on changing behaviors and routines.
+        - Differentiate between Controllables and Uncontrollables.
+        - Suggest tackling avoided tasks with simple to-do lists.
+        YOU ARE NOT A THERAPIST.
+
+        CONTEXT:
+        User Input: \"$userMessage\"
+        Detected State: $primaryLabel (" . round($primaryScore * 100) . "%)
+        
+        STRATEGY FOR THIS RESPONSE:
+        $specificInstruction
+        
+        RESPONSE GUIDELINE:
+        Keep it conversational..";
     }
 
     // Helper to handle the redirect and session storage.
