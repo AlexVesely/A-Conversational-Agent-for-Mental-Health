@@ -40,15 +40,20 @@ class ChatController extends Controller
 
         // Emotion Classification
         $apiData = $this->getEmotionData($userMessage);
+
+        // Build Prompt
+        $llmPrompt = $this->buildLlmPrompt($userMessage,$apiData);
+
+        // Get LLM response
+        $botReply = $this->callLlm($llmPrompt);
         
         // Formatting the Output into String (Temporary for debugging)
         $jsonString = json_encode($apiData);
-        $generatedPrompt = $this->buildLlmPrompt($userMessage,$apiData);
-        $finalResponse = "Hello, I see you said: \"$userMessage\". " . 
+        $debuggingResponse = "Hello, I see you said: \"$userMessage\". " . 
                  "Detected emotion(s) data: $jsonString" . 
-                 "DECISION TREE OUTPUT: $generatedPrompt";
+                 "DECISION TREE OUTPUT: $llmPrompt";
 
-        return $this->redirectWithResponse($finalResponse);
+        return $this->redirectWithResponse($botReply);
     }
 
     //Returns the flagged word if found, otherwise null.
@@ -72,6 +77,7 @@ class ChatController extends Controller
         $url = "https://router.huggingface.co/hf-inference/models/j-hartmann/emotion-english-distilroberta-base";
 
         $response = Http::withToken(env('HF_TOKEN'))
+            ->timeout(60) // Allow up to 60 seconds for AI response
             ->post($url, [ // Send data to the url
                 'inputs' => $inputText,
                 'options' => [
@@ -139,6 +145,36 @@ class ChatController extends Controller
         
         RESPONSE GUIDELINE:
         Keep it conversational..";
+    }
+
+    private function callLlm(string $fullPrompt): string
+    {
+        $url = "https://router.huggingface.co/v1/chat/completions";
+
+        $response = Http::withToken(env('HF_TOKEN'))
+            ->timeout(60) // Allow up to 60 seconds for LLM to write its response
+            ->post($url, [
+                "model" => "meta-llama/Llama-3.2-3B-Instruct", 
+                "messages" => [
+                    [
+                        "role" => "user",
+                        "content" => $fullPrompt // Prompt that was generated earlier
+                    ]
+                ],
+                "max_tokens" => 500, // Limits length of AI reply
+                "stream" => false // Receive AI response all at once rather than word by word
+            ]);
+
+        if ($response->failed()) {
+            // Writes error in storage/logs/laravel.log
+            \Log::error('HF LLM Error: ' . $response->status() . ' - ' . $response->body());
+            return "I'm having a little trouble connecting to my brain. Try again?";
+        }
+
+        $result = $response->json(); //Transform text into php array
+
+        // Format is choices -> message -> content to find the AI response
+        return $result['choices'][0]['message']['content'];
     }
 
     // Helper to handle the redirect and session storage.
