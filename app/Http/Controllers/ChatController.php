@@ -53,7 +53,8 @@ class ChatController extends Controller
                  "Detected emotion(s) data: $jsonString" . 
                  "DECISION TREE OUTPUT: $llmPrompt";
 
-        return $this->redirectWithResponse($botReply);
+        // Send back what the user said and the bot reply
+        return $this->redirectWithResponse($userMessage, $botReply);
     }
 
     //Returns the flagged word if found, otherwise null.
@@ -144,7 +145,12 @@ class ChatController extends Controller
         $specificInstruction
         
         RESPONSE GUIDELINE:
-        Keep it conversational..";
+        - Output ONLY the conversational response to the user.
+        - DO NOT explain your reasoning.
+        - DO NOT mention the strategy used.
+        - DO NOT end by asking non-rhetorical question
+        - Offer advice to what the user said
+        - Start your response directly.";
     }
 
     private function callLlm(string $fullPrompt): string
@@ -177,10 +183,12 @@ class ChatController extends Controller
         return $result['choices'][0]['message']['content'];
     }
 
-    // Helper to handle the redirect and session storage.
-    private function redirectWithResponse(string $message)
+    // Helper to handle the redirect and session storage
+    private function redirectWithResponse(string $userMsg, string $botMsg)
     {
-        session(['response' => $message]); //saves last message/data in short-term memory
-        return redirect()->route('chat.index');
+        return redirect()->route('chat.index')->with([
+            'user_message' => $userMsg,
+            'bot_response' => $botMsg
+        ]);
     }
 }

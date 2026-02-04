@@ -33,10 +33,16 @@
         <button type="submit">Send</button>
     </form>
 
-    @if(session('response'))
+    @if(session('bot_response'))
         <div class="response-box">
-            <h3>Assistant Response</h3>
-            {{ session('response') }}
+            
+            <p><strong>You said:</strong></p>
+            <p> {{ session('user_message') }}</p>
+
+            <p><strong>Assistant Response:</strong></p>
+            <!-- AI response is converted to plain text for security and transforms its nls into <br> -->
+            <div>{!! nl2br(e(session('bot_response'))) !!}</div>
+
         </div>
     @endif
 
