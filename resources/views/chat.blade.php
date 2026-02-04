@@ -40,5 +40,12 @@
         </div>
     @endif
 
+    <div class="mt-4 text-center">
+    <p style="font-weight: bold;">Finished your session?</p>
+    <button>
+        Feedback Form (1-min Survey)
+    </button>
+    </div>
+
 </body>
 </html>
