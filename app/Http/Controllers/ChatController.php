@@ -34,8 +34,8 @@ class ChatController extends Controller
         $flaggedWord = $this->runSafetyFilter($userMessage);
         // if flaggedWord is not null
         if ($flaggedWord) {
-            $alert = "ALERT: HIGH DISTRESS WORD DETECTED: \"$flaggedWord\". PLEASE SEEK A HUMAN THERAPIST.";
-            return $this->redirectWithResponse($alert);
+            $alert = "[TEST MODE] HIGH RISK LANGUAGE DETECTED: \"$flaggedWord\". NORMAL RESPONSE HALTED.";
+            return $this->redirectWithResponse($userMessage, $alert);
         }
 
         // Emotion Classification
@@ -145,6 +145,7 @@ class ChatController extends Controller
         $specificInstruction
         
         RESPONSE GUIDELINE:
+        - You cannot have a conversation with the user. You will not see the follow up to your response.
         - Output ONLY the conversational response to the user.
         - DO NOT explain your reasoning.
         - DO NOT mention the strategy used.
