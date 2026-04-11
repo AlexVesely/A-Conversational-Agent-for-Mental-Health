@@ -28,7 +28,7 @@ class ChatController extends Controller
 
         // IF the validation passes, move on to the code underneath
 
-        $userMessage = $request->input('message'); // Retreuves input from 'message form'
+        $userMessage = $request->input('message'); // Retreives input from 'message form'
 
         // Safety Filter
         $flaggedWord = $this->runSafetyFilter($userMessage);
@@ -161,7 +161,7 @@ class ChatController extends Controller
         $response = Http::withToken(env('HF_TOKEN'))
             ->timeout(60) // Allow up to 60 seconds for LLM to write its response
             ->post($url, [
-                "model" => "meta-llama/Llama-3.2-3B-Instruct", 
+                "model" => "meta-llama/Llama-3.1-8B-Instruct", 
                 "messages" => [
                     [
                         "role" => "user",
@@ -175,7 +175,7 @@ class ChatController extends Controller
         if ($response->failed()) {
             // Writes error in storage/logs/laravel.log
             \Log::error('HF LLM Error: ' . $response->status() . ' - ' . $response->body());
-            return "I'm having a little trouble connecting to my brain. Try again?";
+            return "I'm having a little trouble connecting to the LLM. Try again?";
         }
 
         $result = $response->json(); //Transform text into php array
