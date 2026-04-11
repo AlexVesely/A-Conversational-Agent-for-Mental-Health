@@ -14,9 +14,7 @@ class EnhancedChatController extends Controller
     }
 
     public function handle(Request $request)
-    {
-        // Validation: Ensure message is valid
-        // !!!!!!! CURRENTLY MIN IS SET AS 1 !!!!!!!!!
+    {        // Validation: Ensure message is valid
         $request->validate(
             ['message' => 'required|string|max:1000|min:10'], // checking message exists, is a string and less than 1000 chars
             [
@@ -32,10 +30,17 @@ class EnhancedChatController extends Controller
 
         // Safety Filter
         $flaggedWord = $this->runSafetyFilter($userMessage);
+
         // if flaggedWord is not null
         if ($flaggedWord) {
-            $alert = "[TEST MODE] HIGH RISK LANGUAGE DETECTED: \"$flaggedWord\". NORMAL RESPONSE HALTED.";
-            return $this->redirectWithResponse($userMessage, $alert);
+            $crisisResponse = "The input entered has triggered the crisis detection protocol of this chatbot.\n" .
+                              "Sharing current feelings with a trusted person or a professional is strongly encouraged. Support is available.\n\n" .
+                              "Immediate Help Resources:\n" .
+                              "• NHS: If you need of urgent help for you mental health, get advice or ask for a GP appointment by calling 111.\n" .
+                              "• SHOUT: For free, anonymous support text SHOUT to 85258 to connect to a trained volunteer.\n" . 
+                              "• Emergency: Call 999 in cases of emergency.";
+
+            return $this->redirectWithResponse($userMessage, $crisisResponse, true);
         }
 
         // Emotion Classification
@@ -54,18 +59,28 @@ class EnhancedChatController extends Controller
                  "DECISION TREE OUTPUT: $llmPrompt";
 
         // Send back what the user said and the bot reply
-        return $this->redirectWithResponse($userMessage, $botReply);
+        return $this->redirectWithResponse($userMessage, $botReply, false);
     }
 
-    //Returns the flagged word if found, otherwise null.
+    //Returns the flagged crisis word if found, otherwise null.
     //?string in type signature indicates either string or null can be returned
     private function runSafetyFilter(string $text): ?string
     {
-        $blacklistedWords = ['kill myself', 'suicide', 'suicidal', 'self harm', 'end it all', 'no reason to live'];
+        // These patterns catch crisis words and their misspellings
+        // 'i' at the end makes it case-insensitive
+        $patterns = [
+            '/suicid[aeiouy]*[l]*/i',       // Catches suicide, suicidal, suicidial, suicade, etc.
+            '/kill\s*my\s*self/i',          // Catches kill myself, kill my self, killmyself
+            '/self[\s\-]*harm/i',           // Catches self-harm, self harm, selfharm
+            '/cut\s*my\s*self/i',           // Catches cut myself, cut my self
+            '/end\s*it\s*al+/i',            // Catches end it all, end it al
+            '/wanna\s*die|want\s*to\s*die/i', // Catches want to die, wanna die
+            '/better\s*of+\s*dead/i'        // Catches better off dead, better of dead
+        ];
 
-        foreach ($blacklistedWords as $word) {
-            if (Str::contains(strtolower($text), $word)) {
-                return $word;
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return $matches[0]; // Returns the actual text that triggered the filter
             }
         }
 
@@ -129,6 +144,10 @@ class EnhancedChatController extends Controller
         }
 
         return "SYSTEM INSTRUCTIONS:
+
+        - STRICT RULE: NEVER use first-person pronouns: 'I', 'me', 'my', 'mine', 'myself'.
+        - STRICT RULE: Do not refer to own existence or feelings.
+        - STRICT RULE: Do not mention numerical data or percentage scores (e.g., 79%).
         You are a supportive CBT Chatbot. Follow these core principles:
         - Help the user question unhelpful thoughts/beliefs.
         - Encourage noticing emotions as temporary passing states.
@@ -185,11 +204,12 @@ class EnhancedChatController extends Controller
     }
 
     // Helper to handle the redirect and session storage
-    private function redirectWithResponse(string $userMsg, string $botMsg)
+    private function redirectWithResponse(string $userMsg, string $botMsg, bool $isCrisis = false)
     {
         return redirect()->route('chat1.index')->with([
             'user_message' => $userMsg,
-            'bot_response' => $botMsg
+            'bot_response' => $botMsg,
+            'is_crisis'    => $isCrisis // Pass this to the view
         ]);
     }
 }
