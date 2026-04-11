@@ -120,57 +120,43 @@ class EnhancedChatController extends Controller
         $secondaryLabel = $secondaryEmotion['label'];
         $secondaryScore = $secondaryEmotion['score'];
 
+        // Strategy for the specificInstruction is adapted from https://www.mindmypeelings.com/blog/cbt-principles
         $specificInstruction = "";
 
-        // Check for High Intensity (80%+)
-        if ($primaryScore >= 0.80) {
-            $specificInstruction = "The user is feeling intense $primaryLabel. Prioritize immediate de-escalation and grounding.";
-        } 
         // Check for Combos 
-        elseif ($primaryScore > 0.40 && $secondaryScore > 0.40) {
-            $specificInstruction = "The user is experiencing a mix of $primaryLabel and $secondaryLabel . Help them untangle these feelings.";
+        if ($primaryScore > 0.40 && $secondaryScore > 0.40) {
+            $specificInstruction = "STRICT REQUIREMENT: The user is experiencing a mix of $primaryLabel and $secondaryLabel. Help them untangle these feelings. Encourage 'Role-Playing' to help the user build confidence.";
         }
-        // Standard CBT Mapping
+        // Map emotions to an appropriate CBT support technique
         else {
-            $specificInstruction = match ($primaryLabel) {
-                'anger' => "The user feels angry.",
-                'disgust'   => "The user feels disgusted.",
-                'fear'    => "The user feels fear.",
-                'joy'   => "The user seems joyful." ,
-                'neutral'   => "The user seems neutral." ,
-                'sadness'   => "The user seems sad." ,
-                'surprise'   => "The user seems surprised."
+                $specificInstruction = match ($primaryLabel) {
+                'anger'    => "STRICT REQUIREMENT: Use the 'ABC Model.' Break down the response into: Activating Event, Belief, and Consequence.",          
+                'sadness'  => "STRICT REQUIREMENT: Utilise 'Activity Scheduling.' Suggest identifying and scheduling a small, rewarding behavior or hobby to improve mood through action.",
+                'disgust'  => "STRICT REQUIREMENT: Employ 'Cognitive Restructuring.' Assist in identifying and reframing the irrational thought.",
+                'fear'     => "STRICT REQUIREMENT: Use the 'Worst Case/Best Case/Most Likely Case Scenario.' Explicitly list all three scenarios to rationalize the fear.",
+                'surprise' => "STRICT REQUIREMENT: Utilise 'Guided Discovery.' Ask open-ended questions to help broaden thinking and process the event again.",
+                'joy'      => "STRICT REQUIREMENT: Focus on 'Acceptance and Commitment Therapy.' Encourage acceptance and embracing the joy." ,
+                'neutral'  => "STRICT REQUIREMENT: Encourage 'Journaling.' Help build awareness of potential cognitive errors and understading the personal cognition",
+                default    => "STRICT REQUIREMENT: Provide general supportive guidance based on the Cognitive Triangle (Thoughts impact Feelings which impact Behaviors)."
             };
         }
 
-        return "SYSTEM INSTRUCTIONS:
+        return "
+        ROLE:
+        -Supportive Mental Health Conversation Assistant. Use CBT principles.
 
-        - STRICT RULE: NEVER use first-person pronouns: 'I', 'me', 'my', 'mine', 'myself'.
-        - STRICT RULE: Do not refer to own existence or feelings.
-        - STRICT RULE: Do not mention numerical data or percentage scores (e.g., 79%).
-        You are a supportive CBT Chatbot. Follow these core principles:
-        - Help the user question unhelpful thoughts/beliefs.
-        - Encourage noticing emotions as temporary passing states.
-        - Focus on changing behaviors and routines.
-        - Differentiate between Controllables and Uncontrollables.
-        - Suggest tackling avoided tasks with simple to-do lists.
-        YOU ARE NOT A THERAPIST.
+        CRITICAL RULES:
+        - NEVER use first-person pronouns: 'I', 'me', 'my', 'mine', 'myself'.
+        - DO NOT mention scores, percentages, or AI metadata.
+        - YOU ARE NOT A THERAPIST.
+        - DO NOT RESPOND TO ANYTHING THAT IS NOT MENTAL HEALTH RELATED.
+        - Ensure the response is standalone, the user cannot respond to you.
 
-        CONTEXT:
-        User Input: \"$userMessage\"
-        Detected State: $primaryLabel (" . round($primaryScore * 100) . "%)
-        
-        STRATEGY FOR THIS RESPONSE:
-        $specificInstruction
-        
-        RESPONSE GUIDELINE:
-        - You cannot have a conversation with the user. You will not see the follow up to your response.
-        - Output ONLY the conversational response to the user.
-        - DO NOT explain your reasoning.
-        - DO NOT mention the strategy used.
-        - DO NOT end by asking non-rhetorical question
-        - Offer advice to what the user said
-        - Start your response directly.";
+        PRIMARY INSTRUCTION
+        - You must apply the following CBT technique to the user message. 
+        - TECHNIQUE TO USE: $specificInstruction
+        - USER INPUT: \"$userMessage\"
+        ";
     }
 
     private function callLlm(string $fullPrompt): string
@@ -187,7 +173,7 @@ class EnhancedChatController extends Controller
                         "content" => $fullPrompt // Prompt that was generated earlier
                     ]
                 ],
-                "max_tokens" => 500, // Limits length of AI reply
+                "max_tokens" => 1000, // Limits length of AI reply
                 "stream" => false // Receive AI response all at once rather than word by word
             ]);
 

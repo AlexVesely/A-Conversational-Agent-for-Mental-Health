@@ -35,7 +35,7 @@ class BaselineChatController extends Controller
 
         // Build Prompt. The baseline creates a simple prompt with no CBT strategy
         $llmPrompt = "The user says: \"$userMessage\". Please provide a helpful, direct and complete 
-                        response. The user cannot reply to you so do not expect further interaction.";
+                        response. Do not expect further interaction as the user cannot reply to your response.";
         
         // Get LLM response
         $botReply = $this->callLlm($llmPrompt);
