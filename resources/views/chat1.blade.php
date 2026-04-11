@@ -19,7 +19,7 @@
     @endif
 
 
-    <form method="POST" action="{{ route('chat.handle') }}">
+    <form method="POST" action="{{ route('chat1.handle') }}">
         @csrf
         <p>Hi, please tell me how you are feeling today: </p>
         <textarea 

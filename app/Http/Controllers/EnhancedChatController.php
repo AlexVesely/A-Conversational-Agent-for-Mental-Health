@@ -6,11 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class ChatController extends Controller
+class EnhancedChatController extends Controller
 {
     public function index()
     {
-        return view('chat', ['response' => session('response')]);
+        return view('chat1', ['response' => session('response')]);
     }
 
     public function handle(Request $request)
@@ -18,7 +18,7 @@ class ChatController extends Controller
         // Validation: Ensure message is valid
         // !!!!!!! CURRENTLY MIN IS SET AS 1 !!!!!!!!!
         $request->validate(
-            ['message' => 'required|string|max:1000|min:1'], // checking message exists, is a string and less than 1000 chars
+            ['message' => 'required|string|max:1000|min:10'], // checking message exists, is a string and less than 1000 chars
             [
                 'message.required' => 'Please enter a message.',
                 'message.max'      => 'Your message is too long. Please keep it under 1000 characters.',
@@ -187,7 +187,7 @@ class ChatController extends Controller
     // Helper to handle the redirect and session storage
     private function redirectWithResponse(string $userMsg, string $botMsg)
     {
-        return redirect()->route('chat.index')->with([
+        return redirect()->route('chat1.index')->with([
             'user_message' => $userMsg,
             'bot_response' => $botMsg
         ]);
