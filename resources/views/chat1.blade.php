@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Mental Health Chatbot</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('SmilingEmoji.png') }}">
 </head>
 
 <body>
@@ -21,7 +22,7 @@
 
     <form method="POST" action="{{ route('chat1.handle') }}">
         @csrf
-        <p>Hi, please tell me how you are feeling today: </p>
+        <p>Tell the chatbot how you are feeling today: </p>
         <textarea 
             id="message"
             name="message" 
