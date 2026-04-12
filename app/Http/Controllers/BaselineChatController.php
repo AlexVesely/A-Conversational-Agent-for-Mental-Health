@@ -17,11 +17,11 @@ class BaselineChatController extends Controller
     {
         // Validation: Ensure message is valid
         $request->validate(
-            ['message' => 'required|string|max:1000|min:10'], // checking message exists, is a string and less than 1000 chars
+            ['message' => 'required|string|max:1000|min:2'], // checking message exists, is a string and less than 1000 chars
             [
                 'message.required' => 'Please enter a message.',
                 'message.max'      => 'Your message is too long. Please keep it under 1000 characters.',
-                'message.min'      => 'Your message is too short. Please enter more than 10 characters.'
+                'message.min'      => 'Your message is too short. Please enter more than 1 character.'
             ]        
         );
 
@@ -34,8 +34,7 @@ class BaselineChatController extends Controller
         // SKIP Emotion Classification
 
         // Build Prompt. The baseline creates a simple prompt with no CBT strategy
-        $llmPrompt = "The user says: \"$userMessage\". Please provide a helpful, direct and complete 
-                        response. Do not expect further interaction as the user cannot reply to your response.";
+        $llmPrompt = "The user says: \"$userMessage\". Do not expect further interaction as the user cannot reply to your response.";
         
         // Get LLM response
         $botReply = $this->callLlm($llmPrompt);

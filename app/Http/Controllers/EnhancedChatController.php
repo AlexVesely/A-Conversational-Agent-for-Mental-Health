@@ -16,11 +16,11 @@ class EnhancedChatController extends Controller
     public function handle(Request $request)
     {        // Validation: Ensure message is valid
         $request->validate(
-            ['message' => 'required|string|max:1000|min:10'], // checking message exists, is a string and less than 1000 chars
+            ['message' => 'required|string|max:1000|min:2'], // checking message exists, is a string and less than 1000 chars
             [
                 'message.required' => 'Please enter a message.',
                 'message.max'      => 'Your message is too long. Please keep it under 1000 characters.',
-                'message.min'      => 'Your message is too short. Please enter more than 10 characters.'
+                'message.min'      => 'Your message is too short. Please enter more than 1 character.'
             ]        
         );
 
@@ -33,18 +33,20 @@ class EnhancedChatController extends Controller
 
         // if flaggedWord is not null
         if ($flaggedWord) {
-            $crisisResponse = "The input entered has triggered the crisis detection protocol of this chatbot.\n" .
-                              "Sharing current feelings with a trusted person or a professional is strongly encouraged. Support is available.\n\n" .
-                              "Immediate Help Resources:\n" .
-                              "• NHS: If you need of urgent help for you mental health, get advice or ask for a GP appointment by calling 111.\n" .
-                              "• SHOUT: For free, anonymous support text SHOUT to 85258 to connect to a trained volunteer.\n" . 
-                              "• Emergency: Call 999 in cases of emergency.";
+        $crisisResponse = "**CRITICAL ALERT:** The input entered has triggered the crisis detection protocol. This chatbot is not equipped to handle your input.\n\n" .
+                        "Sharing current feelings with a **trusted person** or a **professional** is strongly encouraged. Support is available.\n\n" .
+                        "### Immediate Help Resources\n\n" . 
+                        "* **NHS:** Call **111** for urgent mental health advice.\n" .
+                        "* **SHOUT:** Text **SHOUT** to **85258** for free support.\n" . 
+                        "* **Emergency:** Call **999** in immediate danger.";
 
-            return $this->redirectWithResponse($userMessage, $crisisResponse, true);
-        }
+        return $this->redirectWithResponse($userMessage, $crisisResponse, true);
+    }
 
         // Emotion Classification
         $apiData = $this->getEmotionData($userMessage);
+
+        $primaryLabel = $apiData['api_response'][0][0]['label']; // Extract primary emotion from input
 
         // Build Prompt
         $llmPrompt = $this->buildLlmPrompt($userMessage,$apiData);
@@ -59,32 +61,45 @@ class EnhancedChatController extends Controller
                  "DECISION TREE OUTPUT: $llmPrompt";
 
         // Send back what the user said and the bot reply
-        return $this->redirectWithResponse($userMessage, $botReply, false);
+        return $this->redirectWithResponse($userMessage, $botReply, false, $primaryLabel);
     }
 
     //Returns the flagged crisis word if found, otherwise null.
     //?string in type signature indicates either string or null can be returned
     private function runSafetyFilter(string $text): ?string
     {
-        // These patterns catch crisis words and their misspellings
-        // 'i' at the end makes it case-insensitive
+        $userMessageLower = strtolower($text); // Transform text to lower case
+        $normalisedText = preg_replace('/[[:punct:]\s]+/', '', $userMessageLower); // Remove all punctuation and spaces
+
+        // Direct Keyword Check
+        $crisisKeywords = ['killmyself', 'suicide', 'suicidal', 'selfharm', 'enditall','endingitall', 'noreasontolive',
+                           'endmylife', 'endeverything', 'takemyownlife','cutmyself', 'cuttingmyself',
+                           'injuremyself','injuringmyself','nothing tolivefor','lifeispointless','tiredofliving','dontwanttoexist',
+                           'wishiwasnt here','wishicoulddisappear','wanttodisappear','ratherbedead',
+                           'icanttakethisanymore','kys','kms','unalivemyself','deletemyself'];
+        foreach ($crisisKeywords as $keyword) {
+            if (str_contains($normalisedText, $keyword)) {
+                return $keyword; 
+            }
+        }
+
+        // 3. PATTERN MATCHING (On original text for misspellings)
         $patterns = [
-            '/suicid[aeiouy]*[l]*/i',       // Catches suicide, suicidal, suicidial, suicade, etc.
-            '/kill\s*my\s*self/i',          // Catches kill myself, kill my self, killmyself
-            '/self[\s\-]*harm/i',           // Catches self-harm, self harm, selfharm
-            '/cut\s*my\s*self/i',           // Catches cut myself, cut my self
-            '/end\s*it\s*al+/i',            // Catches end it all, end it al
-            '/wanna\s*die|want\s*to\s*die/i', // Catches want to die, wanna die
-            '/better\s*of+\s*dead/i'        // Catches better off dead, better of dead
+            '/\bsuicid[aeiouy]*l*\b/i', 
+            '/\bkill\s*my\s*self\b/i', 
+            '/\bself[\s\-]*harm\b/i', 
+            '/\bend\s*it\s*all?\b/i', 
+            '/\bwanna\s*die|want\s*to\s*die\b/i',
+            '/\bbetter\s*of+\s*dead\b/i'
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return $matches[0]; // Returns the actual text that triggered the filter
+                return $matches[0]; 
             }
         }
 
-        return null;
+        return null; // No crisis detected
     }
 
     //Calls the Hugging Face API and returns an array
@@ -180,7 +195,7 @@ class EnhancedChatController extends Controller
         if ($response->failed()) {
             // Writes error in storage/logs/laravel.log
             \Log::error('HF LLM Error: ' . $response->status() . ' - ' . $response->body());
-            return "I'm having a little trouble connecting to the LLM. Try again?";
+            return "Trouble connecting to the LLM. Try again?";
         }
 
         $result = $response->json(); //Transform text into php array
@@ -190,12 +205,13 @@ class EnhancedChatController extends Controller
     }
 
     // Helper to handle the redirect and session storage
-    private function redirectWithResponse(string $userMsg, string $botMsg, bool $isCrisis = false)
+    private function redirectWithResponse(string $userMsg, string $botMsg, bool $isCrisis = false, string $emotion = 'neutral')
     {
         return redirect()->route('chat1.index')->with([
             'user_message' => $userMsg,
             'bot_response' => $botMsg,
-            'is_crisis'    => $isCrisis // Pass this to the view
+            'is_crisis'    => $isCrisis, // Pass this to the view
+            'primary_label' => $emotion
         ]);
     }
 }
