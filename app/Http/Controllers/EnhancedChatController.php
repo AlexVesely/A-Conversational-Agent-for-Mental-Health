@@ -138,24 +138,18 @@ class EnhancedChatController extends Controller
         // Strategy for the specificInstruction is adapted from https://www.mindmypeelings.com/blog/cbt-principles
         $specificInstruction = "";
 
-        // Check for Combos 
-        if ($primaryScore > 0.40 && $secondaryScore > 0.40) {
-            $specificInstruction = "STRICT REQUIREMENT: The user is experiencing a mix of $primaryLabel and $secondaryLabel. Help them untangle these feelings. Encourage 'Role-Playing' to help the user build confidence.";
-        }
         // Map emotions to an appropriate CBT support technique
-        else {
-                $specificInstruction = match ($primaryLabel) {
-                'anger'    => "STRICT REQUIREMENT: Use the 'ABC Model.' Break down the response into: Activating Event, Belief, and Consequence.",          
-                'sadness'  => "STRICT REQUIREMENT: Utilise 'Activity Scheduling.' Suggest identifying and scheduling a small, rewarding behavior or hobby to improve mood through action.",
-                'disgust'  => "STRICT REQUIREMENT: Employ 'Cognitive Restructuring.' Assist in identifying and reframing the irrational thought.",
-                'fear'     => "STRICT REQUIREMENT: Use the 'Worst Case/Best Case/Most Likely Case Scenario.' Explicitly list all three scenarios to rationalize the fear.",
-                'surprise' => "STRICT REQUIREMENT: Utilise 'Guided Discovery.' Ask open-ended questions to help broaden thinking and process the event again.",
-                'joy'      => "STRICT REQUIREMENT: Focus on 'Acceptance and Commitment Therapy.' Encourage acceptance and embracing the joy." ,
-                'neutral'  => "STRICT REQUIREMENT: Encourage 'Journaling.' Help build awareness of potential cognitive errors and understading personal cognition",
-                default    => "STRICT REQUIREMENT: Provide general supportive guidance based on the Cognitive Triangle (Thoughts impact Feelings which impact Behaviors)."
-            };
-        }
-
+        $specificInstruction = match ($primaryLabel) {
+        'anger'    => "STRICT REQUIREMENT: Use the 'ABC Model.' Break down the response into: Activating Event, Belief, and Consequence.",          
+        'sadness'  => "STRICT REQUIREMENT: Utilise 'Activity Scheduling.' Suggest identifying and scheduling a small, rewarding behavior or hobby to improve mood through action.",
+        'disgust'  => "STRICT REQUIREMENT: Employ 'Cognitive Restructuring.' Assist in identifying and reframing the irrational thought.",
+        'fear'     => "STRICT REQUIREMENT: Use the 'Worst Case/Best Case/Most Likely Case Scenario.' Explicitly list all three scenarios to rationalize the fear.",
+        'surprise' => "STRICT REQUIREMENT: Utilise 'Guided Discovery.' Ask open-ended questions to help broaden thinking and process the event again.",
+        'joy'      => "STRICT REQUIREMENT: Focus on 'Acceptance and Commitment Therapy.' Encourage acceptance and embracing the joy." ,
+        'neutral'  => "STRICT REQUIREMENT: Encourage 'Journaling.' Help build awareness of potential cognitive errors and understading personal cognition",
+        default    => "STRICT REQUIREMENT: Provide general supportive guidance based on the Cognitive Triangle (Thoughts impact Feelings which impact Behaviors)."
+        };
+        
         return "
         ROLE:
         -Supportive Mental Health Conversation Assistant. Use CBT principles.
