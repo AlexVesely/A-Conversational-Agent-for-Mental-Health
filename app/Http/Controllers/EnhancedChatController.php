@@ -54,11 +54,11 @@ class EnhancedChatController extends Controller
         // Get LLM response
         $botReply = $this->callLlm($llmPrompt);
         
-        // Formatting the Output into String (Temporary for debugging)
-        $jsonString = json_encode($apiData);
-        $debuggingResponse = "Hello, I see you said: \"$userMessage\". " . 
-                 "Detected emotion(s) data: $jsonString" . 
-                 "DECISION TREE OUTPUT: $llmPrompt";
+        // Formatting the Output into String (DEBUGGING CODE)
+        // $jsonString = json_encode($apiData);
+        // $debuggingResponse = "Hello, I see you said: \"$userMessage\". " . 
+        //          "Detected emotion(s) data: $jsonString" . 
+        //          "DECISION TREE OUTPUT: $llmPrompt";
 
         // Send back what the user said and the bot reply
         return $this->redirectWithResponse($userMessage, $botReply, false, $primaryLabel);
@@ -72,10 +72,10 @@ class EnhancedChatController extends Controller
         $normalisedText = preg_replace('/[[:punct:]\s]+/', '', $userMessageLower); // Remove all punctuation and spaces
 
         // Direct Keyword Check
-        $crisisKeywords = ['killmyself', 'suicide', 'suicidal', 'selfharm', 'enditall','endingitall', 'noreasontolive',
+        $crisisKeywords = ['killmyself','suicide','suicidal','selfharm','enditall','endingitall','noreasontolive',
                            'endmylife', 'endeverything', 'takemyownlife','cutmyself', 'cuttingmyself',
-                           'injuremyself','injuringmyself','nothing tolivefor','lifeispointless','tiredofliving','dontwanttoexist',
-                           'wishiwasnt here','wishicoulddisappear','wanttodisappear','ratherbedead',
+                           'injuremyself','injuringmyself','nothingtolivefor','lifeispointless','tiredofliving',
+                           'dontwanttoexist','wishiwasnthere','wishicoulddisappear','wanttodisappear','ratherbedead',
                            'icanttakethisanymore','kys','kms','unalivemyself','deletemyself'];
         foreach ($crisisKeywords as $keyword) {
             if (str_contains($normalisedText, $keyword)) {
@@ -151,7 +151,7 @@ class EnhancedChatController extends Controller
                 'fear'     => "STRICT REQUIREMENT: Use the 'Worst Case/Best Case/Most Likely Case Scenario.' Explicitly list all three scenarios to rationalize the fear.",
                 'surprise' => "STRICT REQUIREMENT: Utilise 'Guided Discovery.' Ask open-ended questions to help broaden thinking and process the event again.",
                 'joy'      => "STRICT REQUIREMENT: Focus on 'Acceptance and Commitment Therapy.' Encourage acceptance and embracing the joy." ,
-                'neutral'  => "STRICT REQUIREMENT: Encourage 'Journaling.' Help build awareness of potential cognitive errors and understading the personal cognition",
+                'neutral'  => "STRICT REQUIREMENT: Encourage 'Journaling.' Help build awareness of potential cognitive errors and understading personal cognition",
                 default    => "STRICT REQUIREMENT: Provide general supportive guidance based on the Cognitive Triangle (Thoughts impact Feelings which impact Behaviors)."
             };
         }
@@ -162,7 +162,6 @@ class EnhancedChatController extends Controller
 
         CRITICAL RULES:
         - NEVER use first-person pronouns: 'I', 'me', 'my', 'mine', 'myself'.
-        - DO NOT mention scores, percentages, or AI metadata.
         - YOU ARE NOT A THERAPIST.
         - DO NOT RESPOND TO ANYTHING THAT IS NOT MENTAL HEALTH RELATED.
         - Ensure the response is standalone, the user cannot respond to you.
@@ -188,7 +187,7 @@ class EnhancedChatController extends Controller
                         "content" => $fullPrompt // Prompt that was generated earlier
                     ]
                 ],
-                "max_tokens" => 1000, // Limits length of AI reply
+                "max_tokens" => 800, // Limits length of AI reply
                 "stream" => false // Receive AI response all at once rather than word by word
             ]);
 
