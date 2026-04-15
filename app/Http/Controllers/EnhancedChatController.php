@@ -128,12 +128,8 @@ class EnhancedChatController extends Controller
         $scores = $apiData['api_response'][0];
 
         $primaryEmotion = $scores[0]; // API returns emotion in order of highest confidence classification
-        $secondaryEmotion = $scores[1];
 
         $primaryLabel = $primaryEmotion['label'];
-        $primaryScore = $primaryEmotion['score'];
-        $secondaryLabel = $secondaryEmotion['label'];
-        $secondaryScore = $secondaryEmotion['score'];
 
         // Strategy for the specificInstruction is adapted from https://www.mindmypeelings.com/blog/cbt-principles
         $specificInstruction = "";
