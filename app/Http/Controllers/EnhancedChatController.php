@@ -10,7 +10,7 @@ class EnhancedChatController extends Controller
 {
     public function index()
     {
-        return view('chat1', ['response' => session('response')]);
+        return view('chatA', ['response' => session('response')]);
     }
 
     public function handle(Request $request)
@@ -196,7 +196,7 @@ class EnhancedChatController extends Controller
     // Helper to handle the redirect and session storage
     private function redirectWithResponse(string $userMsg, string $botMsg, bool $isCrisis = false, string $emotion = 'neutral')
     {
-        return redirect()->route('chat1.index')->with([
+        return redirect()->route('chatA.index')->with([
             'user_message' => $userMsg,
             'bot_response' => $botMsg,
             'is_crisis'    => $isCrisis, // Pass this to the view

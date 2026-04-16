@@ -120,7 +120,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('chat1.handle') }}">
+        <form method="POST" action="{{ route('chatA.handle') }}">
             @csrf
             <p>Tell the chatbot how you are feeling today: </p>
             <textarea id="message" name="message" rows="6" placeholder="Type here...">{{ old('message') }}</textarea>

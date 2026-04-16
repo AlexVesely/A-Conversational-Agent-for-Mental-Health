@@ -11,8 +11,8 @@ Route::get('/', function () {
 });
 
 
-Route::get('/chat1', [EnhancedChatController::class, 'index'])->name('chat1.index'); // Show UI
-Route::post('/chat1', [EnhancedChatController::class, 'handle'])->name('chat1.handle'); // Process Input
+Route::get('/chatA', [EnhancedChatController::class, 'index'])->name('chatA.index'); // Show UI
+Route::post('/chatA', [EnhancedChatController::class, 'handle'])->name('chatA.handle'); // Process Input
 
-Route::get('/chat2', [BaselineChatController::class, 'index'])->name('chat2.index'); // Show UI
-Route::post('/chat2', [BaselineChatController::class, 'handle'])->name('chat2.handle'); // Process Input
+Route::get('/chatB', [BaselineChatController::class, 'index'])->name('chatB.index'); // Show UI
+Route::post('/chatB', [BaselineChatController::class, 'handle'])->name('chatB.handle'); // Process Input

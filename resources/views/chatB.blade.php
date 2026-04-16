@@ -77,7 +77,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('chat2.handle') }}">
+        <form method="POST" action="{{ route('chatB.handle') }}">
             @csrf
             <p>Hi, please tell me how you are feeling today:</p>
             <textarea name="message" rows="6" placeholder="Type your thoughts here...">{{ old('message') }}</textarea>

@@ -10,7 +10,7 @@ class BaselineChatController extends Controller
 {
     public function index()
     {
-        return view('chat2', ['response' => session('response')]);
+        return view('chatB', ['response' => session('response')]);
     }
 
     public function handle(Request $request)
@@ -76,7 +76,7 @@ class BaselineChatController extends Controller
     // Helper to handle the redirect and session storage
     private function redirectWithResponse(string $userMsg, string $botMsg)
     {
-        return redirect()->route('chat2.index')->with([
+        return redirect()->route('chatB.index')->with([
             'user_message' => $userMsg,
             'bot_response' => $botMsg
         ]);
