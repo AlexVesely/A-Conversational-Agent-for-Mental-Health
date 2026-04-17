@@ -177,7 +177,7 @@ class EnhancedChatController extends Controller
                         "content" => $fullPrompt // Prompt that was generated earlier
                     ]
                 ],
-                "max_tokens" => 800, // Limits length of AI reply
+                "max_tokens" => 500, // Limits length of AI reply
                 "stream" => false // Receive AI response all at once rather than word by word
             ]);
 
