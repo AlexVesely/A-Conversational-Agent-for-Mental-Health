@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Mental Health Chatbot</title>
+    <title>Mental Health Chatbot A</title>
     <link rel="icon" href="{{ asset('SmilingEmoji.png') }}">
     <style>
         body { 
@@ -108,7 +108,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Mental Health Chatbot</h1>
+        <h1>Mental Health Chatbot A</h1>
         @if ($errors->any())
             <div class="error-box">
                 <strong>Error:</strong>
@@ -122,7 +122,10 @@
 
         <form method="POST" action="{{ route('chatA.handle') }}">
             @csrf
-            <p>Tell the chatbot how you are feeling today: </p>
+            <div class="instruction-box" style="margin-bottom: 15px; color: #555;">
+                <p>Tell the chatbot how you are feeling or what you would like support for.</p>
+                <p style="font-style: italic; font-size: 0.9em;">Example: "I have a presentation tomorrow that I am really scared about."</p>
+            </div>
             <textarea id="message" name="message" rows="6" placeholder="Type here...">{{ old('message') }}</textarea>
 
             <div class="transparency-notice">
