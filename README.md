@@ -15,9 +15,10 @@ To access the project and explore it yourself please follow this set up.
 
 ### Steps
 
-- Clone the repository
+- Clone this repository.
 - Install all PHP and Node dependencies needed for a Laravel project.
-- Run migrations and seeders.
-- Build front end assets.
-- Put the sail up.
-- Open localhost in your browser.
+- Create a .env file and your 'Hugging Face' token to the .env file.
+- Start Laravel Sail.
+- Open the application in your browser:
+  - Enhanced version: http://localhost/chatA
+  - Baseline version: http://localhost/chatB
