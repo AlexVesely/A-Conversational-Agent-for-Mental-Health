@@ -50,7 +50,7 @@ Full evaluation details and results are available in the dissertation.
 
 ## Demo
 
-(A recorded demonstration of the two chatbots will be available soon)
+Watch a full showcase of the working project in this <a href="https://youtu.be/3J3fwARlao0">youtube video!</a> 
 
 ## Set Up
 
