@@ -13,9 +13,9 @@ To investigate this, I developed and compared two systems:
   - A baseline pure LLM chatbot.
   - An enhanced chatbot with additional safety and therapeutic features. 
 
-If you are interested in reading more about this project. please refer to the dissertation linked below.
+If you are interested in learning more about this project, please refer to the full dissertation below.
 
-<b>Dissertation:</b> (PDF will be available after marks are released)
+**Dissertation:** 📄 [A Conversational Agent for Mental Health (PDF)](AConversationalAgentForMentalHealth.pdf)
 
 ## Features
 
