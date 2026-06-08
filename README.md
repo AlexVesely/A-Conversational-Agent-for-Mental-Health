@@ -15,7 +15,7 @@ To investigate this, I developed and compared two systems:
 
 If you are interested in learning more about this project, please refer to the full dissertation below.
 
-**Dissertation:** 📄 [A Conversational Agent for Mental Health (PDF)](AConversationalAgentForMentalHealth.pdf)
+**Dissertation:** 📄 [A Conversational Agent for Mental Health (PDF)](AConversationalAgentForMentalHealth.pdf) (This dissertation was awarded a First Class grade)
 
 ## Features
 
